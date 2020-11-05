@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "pzip.h"
 
@@ -25,7 +26,7 @@
 
 pthread_barrier_t barrier;
 pthread_mutex_t lock1;
-pthread_mutex_t lock2;
+//pthread_mutex_t lock2;
 
 void pzip(int n_threads, char *input_chars, int input_chars_size,
 	  struct zipped_char *zipped_chars, int *zipped_chars_count,
@@ -46,7 +47,7 @@ void pzip(int n_threads, char *input_chars, int input_chars_size,
 	//call pthread_barrier()
 	pthread_barrier_init(&barrier, NULL, n_threads);
 	pthread_mutex_init(&lock1, NULL);
-	pthread_mutex_init(&lock2, NULL);
+	//pthread_mutex_init(&lock2, NULL);
 
 	struct reader info[n_threads];
 	
@@ -55,9 +56,9 @@ void pzip(int n_threads, char *input_chars, int input_chars_size,
 	{
 		info[i].input_chars = input_chars + i*(input_chars_size / n_threads);
 		info[i].iterate_num = input_chars_size / n_threads;
-
-		info[i].char_frequency = char_frequency;
 		info[i].local_zip_char = malloc(info[i].iterate_num*sizeof(struct zipped_char)); // need to free this later
+		info[i].char_frequency = char_frequency;
+		
 		info[i].local_zip_char_size = 0;
 
 		pthread_create(&tid[i], NULL, threaded_zip, (void*) &info[i]);
@@ -67,6 +68,7 @@ void pzip(int n_threads, char *input_chars, int input_chars_size,
 
 	*zipped_chars_count = 0;
 	//call pthread_join()
+	
 	for(int i = 0; i < n_threads; i = i + 1)
 	{
 		pthread_join(tid[i], NULL);
@@ -74,14 +76,18 @@ void pzip(int n_threads, char *input_chars, int input_chars_size,
 		{
 			zipped_chars[*zipped_chars_count + j] = info[i].local_zip_char[j];
 		}
+		free(info[i].local_zip_char);
 		*zipped_chars_count = *zipped_chars_count + info[i].local_zip_char_size;
 	}
 	pthread_mutex_destroy(&lock1);
-	pthread_mutex_destroy(&lock2);
+	//pthread_mutex_destroy(&lock2);
+	/*
 	for(int i = 0; i < n_threads; i = i + 1)
 	{
-		free(info[i].local_zip_char);
+
 	}
+	*/	
+
 	return;
 }
 
@@ -89,6 +95,8 @@ void* threaded_zip(void *test)
 {
 	struct reader *info = (struct reader*) test;
 	
+	//info->local_zip_char = malloc(info->iterate_num*sizeof(struct zipped_char)); // need to free this later
+
 	int occurence = 1;
 	int zip_num = 0;
 
@@ -114,20 +122,27 @@ void* threaded_zip(void *test)
 
 	info->local_zip_char_size = zip_num;
 	
-	pthread_barrier_wait(&barrier);
+	//pthread_barrier_wait(&barrier);
 
-	pthread_mutex_lock(&lock1);
+	
 	for(int i = 0; i < zip_num; i = i + 1)
 	{
-		info->char_frequency[info->local_zip_char[i].character - 97] = info->char_frequency[info->local_zip_char[i].character - 97] + info->local_zip_char[i].occurence;
+		info->char_frequency[info->local_zip_char[i].character - 97] = info->char_frequency[info->local_zip_char[i].character - 97] + info->local_zip_char[i].occurence;	
 	}
+	//info->zipped_chars_count = info->zipped_chars_count + zip_num;
+	/*
+	pthread_barrier_wait(&barrier);
+	pthread_mutex_lock(&lock1);
+	*info->zipped_chars_count = *info->zipped_chars_count + zip_num;
 	pthread_mutex_unlock(&lock1);
-
+	*/
 	//pthread_mutex_lock(&lock2);
-	//*info->zipped_chars_count = *info->zipped_chars_count + zip_num;
+	
 	//pthread_mutex_unlock(&lock2);
 	
-	pthread_barrier_wait(&barrier);
+	//pthread_barrier_wait(&barrier);
+
+	//sleep(0.00002);
 	
 	return 0;
 }
