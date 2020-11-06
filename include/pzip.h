@@ -18,9 +18,10 @@ struct reader {
 
 	// data going out
 	int *char_frequency;
-	struct zipped_char *local_zip_char;
+	struct zipped_char *zipped_chars;
 	int *zipped_chars_count;
-	int local_zip_char_size;
+	int *local_zip_char_size;
+	int thread_num;
 };
 
 /**
