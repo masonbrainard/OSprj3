@@ -12,11 +12,9 @@ struct zipped_char {
 };
 
 struct reader {
-	// data going in
 	char *input_chars;
 	int iterate_num;
 
-	// data going out
 	int *char_frequency;
 	struct zipped_char *zipped_chars;
 	int *zipped_chars_count;

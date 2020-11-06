@@ -59,9 +59,9 @@ void pzip(int n_threads, char *input_chars, int input_chars_size,
 
 	*zipped_chars_count = 0;
 
-	for (int i = 0; i < n_threads; i = i + 1) {
+	for (int i = 0; i < n_threads; i = i + 1)
 		pthread_join(tid[i], NULL);
-	}
+
 	free(local_zip_char_size);
 	pthread_mutex_destroy(&lock1);
 	pthread_mutex_destroy(&lock2);
