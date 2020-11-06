@@ -112,9 +112,9 @@ void* threaded_zip(void *test)
 			local_zipped_char[zip_num].character = info->input_chars[i];
 			local_zipped_char[zip_num].occurence = occurence;
 
-			pthread_mutex_lock(&lock1);
-			info->char_frequency[local_zipped_char[zip_num].character - 97] = info->char_frequency[local_zipped_char[zip_num].character - 97] + local_zipped_char[zip_num].occurence;
-			pthread_mutex_unlock(&lock1);
+			//pthread_mutex_lock(&lock1);
+			//info->char_frequency[local_zipped_char[zip_num].character - 97] = info->char_frequency[local_zipped_char[zip_num].character - 97] + local_zipped_char[zip_num].occurence;
+			//pthread_mutex_unlock(&lock1);
 
 			occurence = 1;
 			zip_num = zip_num + 1;
@@ -124,11 +124,18 @@ void* threaded_zip(void *test)
 	local_zipped_char[zip_num].character = info->input_chars[info->iterate_num - 1];
 	local_zipped_char[zip_num].occurence = occurence;
 
-	pthread_mutex_lock(&lock1);
-	info->char_frequency[local_zipped_char[zip_num].character - 97] = info->char_frequency[local_zipped_char[zip_num].character - 97] + local_zipped_char[zip_num].occurence;
-	pthread_mutex_unlock(&lock1);
+	//pthread_mutex_lock(&lock1);
+	//info->char_frequency[local_zipped_char[zip_num].character - 97] = info->char_frequency[local_zipped_char[zip_num].character - 97] + local_zipped_char[zip_num].occurence;
+	//pthread_mutex_unlock(&lock1);
 
 	zip_num = zip_num + 1;
+
+	for(int i = 0; i < zip_num; i = i + 1)
+	{
+		pthread_mutex_lock(&lock1);
+		info->char_frequency[local_zipped_char[i].character - 97] = info->char_frequency[local_zipped_char[i].character - 97] + local_zipped_char[i].occurence;
+		pthread_mutex_unlock(&lock1);
+	}
 
 	pthread_mutex_lock(&lock2);
 	info->local_zip_char_size[info->thread_num] = zip_num;
